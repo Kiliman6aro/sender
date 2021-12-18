@@ -34,5 +34,5 @@ phone - номер телефона получателя, если его нет
 * (При желании) написать unit тесты. 
 
 ### Запуск
-composer install
-user@server$ php src/index.php
+* composer install
+* user@server$ php src/index.php
