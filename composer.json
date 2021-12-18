@@ -1,0 +1,20 @@
+{
+    "name": "pavel/sender",
+    "type": "project",
+    "authors": [
+        {
+            "name": "B.Pavel",
+            "email": "kiliman6aro@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "7.4",
+        "illuminate/validation": "^8.76",
+        "fakerphp/faker": "^1.17"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src"
+        }
+    }
+}
