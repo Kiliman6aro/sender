@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Library\Container;
 use App\Library\Translator;
 use App\Models\Voucher;
-use App\Services\NewSendVoucherService;
+use App\Services\Sender\FactorySender;
 use Illuminate\Validation\Factory;
 
 class GiftController
@@ -14,25 +14,38 @@ class GiftController
     {
         $data = $_POST;
 
+        try {
 
-        $factory = new Factory(new Translator(), new Container());
+            if(!isset($_GET['voucher_id'])) {
+                throw new \Exception('Missing required parameter voucher_id');
+            }
 
-        $validator = $factory->make($data, [
-            'email' => 'required|required'
-        ]);
+            if(empty($data['email']) && empty($data['senderMobile'])) {
+                throw new \Exception('Email or senderMobile cannot be empty');
+            }
 
-        if ($validator->fails()) {
-            exit (json_encode(['error' => 'Email is required']));
-        }
-        $voucher = Voucher::find($_GET['voucher_id']);
+            if(!empty($data['email']) && !empty($data['senderMobile'])) {
+                throw new \Exception('Can choose only one type of sending');
+            }
 
-        if (!empty($data['email']) || !empty($data['gratitudeEmail'])) {
-            NewSendVoucherService::send($voucher, $data);
-        }
-        if ($data['mobile'] != '') {
-            $text = $data['msg'] . "" . PHP_EOL;
-            $text .= $data['friendName'];
-            NewSendVoucherService::sendSms($voucher, $text, $data);
+            $factory = new Factory(new Translator(), new Container());
+
+            if(!empty($data['email'])) {
+                $validator = $factory->make($data, [
+                    'email' => 'email'
+                ]);
+
+                if ($validator->fails()) {
+                    throw new \Exception('Invalid Email');
+                }
+            }
+
+            $sender = (new FactorySender())->execute($data);
+            $sender->send(Voucher::find($_GET['voucher_id']), $data);
+
+        } catch (\Exception $e) {
+
+            return json_encode(['error' => $e->getMessage()]);
         }
     }
 }
