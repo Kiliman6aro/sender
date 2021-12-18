@@ -1,6 +1,6 @@
 # Рассылка уведомлений Sender.
 
-**Данный код взят из Laravel, поэтому используется его validator:**
+**Данный код взят из приложения на Laravel, поэтому используется его validator:**
 >https://packagist.org/packages/illuminate/validation
 
 **Кроме этого, для эмитации работы используется библиотека Faker:**
