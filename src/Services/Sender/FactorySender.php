@@ -5,16 +5,13 @@ namespace App\Services\Sender;
 
 class FactorySender
 {
-    public function execute(array $data)
+    public function execute(array $data): MessengerInterface
     {
-
-        if(!empty($data['email'])) {
-            return new MailMessenger();
-        }
-
 
         if(!empty($data['senderMobile'])) {
             return new PhoneMessenger();
         }
+
+        return new MailMessenger();
     }
 }
