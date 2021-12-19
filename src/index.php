@@ -8,10 +8,10 @@ $faker = \Faker\Factory::create();
 
 $_GET['voucher_id'] = $faker->uuid;
 
-$_POST['email'] = $faker->email;
+//$_POST['email'] = $faker->email;
 
 //random defining you  have mobile or no
-$_POST['senderMobile'] = (rand(0, 3) == 3) ? $faker->e164PhoneNumber : null;
+$_POST['senderMobile'] =  $faker->e164PhoneNumber;
 $_POST['mobile'] = $_POST['senderMobile'] ? $faker->e164PhoneNumber : null;
 $_POST['friendName'] = $faker->name;
 $_POST['greeting'] = $faker->text(50);
@@ -20,5 +20,5 @@ $_POST['from'] = $faker->email;
 $_POST['msg'] = $faker->text(100);
 
 
-(new GiftController())->sendThanks();
+(new GiftController())->sendThanks($_GET['voucher_id']);
 

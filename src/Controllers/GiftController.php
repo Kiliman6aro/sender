@@ -2,46 +2,33 @@
 
 namespace App\Controllers;
 
+use App\Http\Request\Sender\SenderHttpRequest;
 use App\Library\Container;
 use App\Library\Translator;
 use App\Models\Voucher;
-use App\Services\Sender\FactorySender;
+use App\Services\Sender\ClientSender;
 use Illuminate\Validation\Factory;
 
 class GiftController
 {
-    public function sendThanks()
+    public function sendThanks($id)
     {
         $data = $_POST;
 
         try {
 
-            if(!isset($_GET['voucher_id'])) {
-                throw new \Exception('Missing required parameter voucher_id');
+            $senderHttpRequest = (new SenderHttpRequest(new Factory(new Translator(), new Container()), $data));
+            $senderValidation = $senderHttpRequest->getValidator();
+
+            if ($senderValidation->fails()) {
+                throw new \Exception($senderValidation->errors()->first());
             }
 
-            if(empty($data['email']) && empty($data['senderMobile'])) {
-                throw new \Exception('Email or senderMobile cannot be empty');
-            }
+            $form = $senderHttpRequest->getFrom()->setData($senderValidation->getData(), Voucher::find($id));
 
-            if(!empty($data['email']) && !empty($data['senderMobile'])) {
-                throw new \Exception('Can choose only one type of sending');
-            }
+            $sender = (new ClientSender())->getFactory($form);
 
-            $factory = new Factory(new Translator(), new Container());
-
-            if(!empty($data['email'])) {
-                $validator = $factory->make($data, [
-                    'email' => 'email'
-                ]);
-
-                if ($validator->fails()) {
-                    throw new \Exception('Invalid Email');
-                }
-            }
-
-            $sender = (new FactorySender())->execute($data);
-            $sender->send(Voucher::find($_GET['voucher_id']), $data);
+            $sender->createNotification()->send();
 
         } catch (\Exception $e) {
 
