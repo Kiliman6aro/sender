@@ -2,37 +2,32 @@
 
 namespace App\Controllers;
 
+use App\Http\Request\Sender\SenderHttpRequest;
 use App\Library\Container;
 use App\Library\Translator;
 use App\Models\Voucher;
-use App\Services\NewSendVoucherService;
+use App\Services\Sender\SenderCreator;
 use Illuminate\Validation\Factory;
 
 class GiftController
 {
-    public function sendThanks()
+    public function sendThanks($id)
     {
         $data = $_POST;
 
+        try {
 
-        $factory = new Factory(new Translator(), new Container());
+            $senderValidation = ((new SenderHttpRequest(new Factory(new Translator(), new Container()), $data)))->getValidator();
 
-        $validator = $factory->make($data, [
-            'email' => 'required|required'
-        ]);
+            if ($senderValidation->fails()) {
+                throw new \Exception($senderValidation->errors()->first());
+            }
 
-        if ($validator->fails()) {
-            exit (json_encode(['error' => 'Email is required']));
-        }
-        $voucher = Voucher::find($_GET['voucher_id']);
+            (new SenderCreator($senderValidation->getData(), Voucher::find($id)))->creatorSender()->send();
 
-        if (!empty($data['email']) || !empty($data['gratitudeEmail'])) {
-            NewSendVoucherService::send($voucher, $data);
-        }
-        if ($data['mobile'] != '') {
-            $text = $data['msg'] . "" . PHP_EOL;
-            $text .= $data['friendName'];
-            NewSendVoucherService::sendSms($voucher, $text, $data);
+        } catch (\Exception $e) {
+
+            return json_encode(['error' => $e->getMessage()]);
         }
     }
 }
