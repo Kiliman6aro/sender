@@ -8,7 +8,7 @@ $faker = \Faker\Factory::create();
 
 $_GET['voucher_id'] = $faker->uuid;
 
-//$_POST['email'] = $faker->email;
+$_POST['email'] = $faker->email;
 
 //random defining you  have mobile or no
 $_POST['senderMobile'] =  $faker->e164PhoneNumber;

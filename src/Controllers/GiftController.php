@@ -6,7 +6,7 @@ use App\Http\Request\Sender\SenderHttpRequest;
 use App\Library\Container;
 use App\Library\Translator;
 use App\Models\Voucher;
-use App\Services\Sender\ClientSender;
+use App\Services\Sender\SenderCreator;
 use Illuminate\Validation\Factory;
 
 class GiftController
@@ -17,18 +17,13 @@ class GiftController
 
         try {
 
-            $senderHttpRequest = (new SenderHttpRequest(new Factory(new Translator(), new Container()), $data));
-            $senderValidation = $senderHttpRequest->getValidator();
+            $senderValidation = ((new SenderHttpRequest(new Factory(new Translator(), new Container()), $data)))->getValidator();
 
             if ($senderValidation->fails()) {
                 throw new \Exception($senderValidation->errors()->first());
             }
 
-            $form = $senderHttpRequest->getFrom()->setData($senderValidation->getData(), Voucher::find($id));
-
-            $sender = (new ClientSender())->getFactory($form);
-
-            $sender->createNotification()->send();
+            (new SenderCreator($senderValidation->getData(), Voucher::find($id)))->creatorSender()->send();
 
         } catch (\Exception $e) {
 

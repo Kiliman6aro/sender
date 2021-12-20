@@ -2,9 +2,6 @@
 
 namespace App\Http\Request\Sender;
 
-use App\Services\Sender\DataForm\DataFrom;
-use App\Services\Sender\DataForm\EmailDataForm;
-use App\Services\Sender\DataForm\SmsDataFrom;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\Validator;
 
@@ -50,14 +47,5 @@ class SenderHttpRequest
             ]
 
         );
-    }
-
-    public function getFrom(): DataFrom
-    {
-        if ($this->data['senderMobile']) {
-            return new SmsDataFrom();
-        }
-
-        return new EmailDataForm();
     }
 }
